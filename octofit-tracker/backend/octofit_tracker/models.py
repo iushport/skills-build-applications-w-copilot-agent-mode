@@ -1,47 +1,43 @@
-from pymongo import MongoClient
+from djongo import models
 
-# MongoDB connection setup
-client = MongoClient('localhost', 27017)
-db = client['octofit_db']
+class User(models.Model):
+    _id = models.ObjectIdField()
+    username = models.CharField(max_length=100)
+    email = models.EmailField(unique=True)
+    password = models.CharField(max_length=100)
 
-class User:
-    def __init__(self, username, email, password):
-        self.username = username
-        self.email = email
-        self.password = password
+    class Meta:
+        db_table = "users"
 
-    def save(self):
-        db.users.insert_one(self.__dict__)
+class Team(models.Model):
+    _id = models.ObjectIdField()
+    name = models.CharField(max_length=100)
+    members = models.ArrayReferenceField(to=User, on_delete=models.CASCADE)
 
-class Team:
-    def __init__(self, name, members):
-        self.name = name
-        self.members = members
+    class Meta:
+        db_table = "teams"
 
-    def save(self):
-        db.teams.insert_one(self.__dict__)
+class Activity(models.Model):
+    _id = models.ObjectIdField()
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    activity_type = models.CharField(max_length=100)
+    duration = models.DurationField()
 
-class Activity:
-    def __init__(self, user, activity_type, duration):
-        self.user = user
-        self.activity_type = activity_type
-        self.duration = duration
+    class Meta:
+        db_table = "activities"
 
-    def save(self):
-        db.activities.insert_one(self.__dict__)
+class Leaderboard(models.Model):
+    _id = models.ObjectIdField()
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    score = models.IntegerField()
 
-class Leaderboard:
-    def __init__(self, user, score):
-        self.user = user
-        self.score = score
+    class Meta:
+        db_table = "leaderboard"
 
-    def save(self):
-        db.leaderboards.insert_one(self.__dict__)
+class Workout(models.Model):
+    _id = models.ObjectIdField()
+    name = models.CharField(max_length=100)
+    description = models.TextField()
 
-class Workout:
-    def __init__(self, name, description):
-        self.name = name
-        self.description = description
-
-    def save(self):
-        db.workouts.insert_one(self.__dict__)
+    class Meta:
+        db_table = "workouts"
